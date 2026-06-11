@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduSchedule Pro – 학습 진도 관리</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --indigo:#4F46E5;--indigo-dark:#3730A3;--indigo-light:#EEF2FF;--indigo-mid:#C7D2FE;
+  --green:#16A34A;--green-light:#DCFCE7;
+  --orange:#F97316;--orange-light:#FFF7ED;
+  --red:#DC2626;--red-light:#FEF2F2;
+  --yellow:#FBBF24;
+  --gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;
+  --gray-300:#D1D5DB;--gray-400:#9CA3AF;--gray-500:#6B7280;
+  --gray-600:#4B5563;--gray-700:#374151;--gray-800:#1F2937;
+  --white:#fff;
+  --radius:10px;--radius-lg:14px;
+  --shadow:0 1px 4px rgba(0,0,0,.08);--shadow-md:0 4px 16px rgba(0,0,0,.1);
+}
+body{font-family:'Segoe UI','Apple SD Gothic Neo',sans-serif;background:var(--gray-100);color:var(--gray-800);min-height:100vh;}
+
+/* ── TOPBAR ── */
+.topbar{
+  background:var(--white);border-bottom:1px solid var(--gray-200);
+  padding:0 24px;height:52px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:200;
+}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:32px;height:32px;background:var(--indigo);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:1rem;}
+.logo-text{font-size:1rem;font-weight:800;color:var(--gray-800);}
+.logo-text span{color:var(--indigo);}
+.year-badge{font-size:0.72rem;background:var(--indigo-light);color:var(--indigo);padding:2px 8px;border-radius:20px;font-weight:700;}
+.topbar-right{display:flex;gap:8px;}
+.topbar-btn{
+  display:flex;align-items:center;gap:5px;
+  font-size:0.78rem;padding:6px 12px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--gray-200);background:var(--white);color:var(--gray-600);
+  font-weight:600;transition:background .15s;
+}
+.topbar-btn:hover{background:var(--gray-50);}
+.topbar-btn.danger{border-color:#FECACA;color:var(--red);}
+.topbar-btn.danger:hover{background:var(--red-light);}
+
+/* ── LAYOUT ── */
+.layout{max-width:1280px;margin:0 auto;padding:20px 16px;display:flex;flex-direction:column;gap:20px;}
+
+/* ── STUDENT BAR ── */
+.student-bar{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:16px 20px;}
+.student-input-row{display:flex;gap:10px;margin-bottom:12px;}
+.student-input{
+  flex:1;padding:9px 14px;border:1.5px solid var(--gray-200);border-radius:8px;
+  font-size:0.9rem;outline:none;transition:border-color .15s;
+}
+.student-input:focus{border-color:var(--indigo);}
+.btn-add-student{
+  padding:9px 18px;background:var(--indigo);color:white;border:none;
+  border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer;white-space:nowrap;
+  transition:background .15s;
+}
+.btn-add-student:hover{background:var(--indigo-dark);}
+.student-tags-label{font-size:0.78rem;color:var(--gray-500);margin-bottom:8px;}
+.student-tags{display:flex;flex-wrap:wrap;gap:8px;}
+.student-tag{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:20px;cursor:pointer;
+  font-size:0.82rem;font-weight:600;border:2px solid transparent;
+  background:var(--gray-100);color:var(--gray-600);transition:all .15s;
+}
+.student-tag.active{background:var(--indigo);color:white;border-color:var(--indigo);}
+.student-tag:hover:not(.active){background:var(--indigo-light);color:var(--indigo);}
+.student-tag .del{font-size:0.85rem;opacity:.7;margin-left:2px;cursor:pointer;pointer-events:all;line-height:1;padding:0 2px;background:none;border:none;font-family:inherit;color:inherit;}
+.student-tag .del:hover{opacity:1;color:var(--red);}
+.share-row{
+  margin-top:12px;border:1px dashed var(--gray-300);border-radius:8px;
+  padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;
+  color:var(--gray-500);font-size:0.82rem;transition:background .15s;
+}
+.share-row:hover{background:var(--gray-50);}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+@media(max-width:700px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-card{
+  background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow);
+  padding:18px 20px;display:flex;align-items:center;gap:14px;
+}
+.stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.stat-icon.blue{background:var(--indigo-light);}
+.stat-icon.green{background:var(--green-light);}
+.stat-icon.orange{background:var(--orange-light);}
+.stat-icon.gray{background:var(--gray-100);}
+.stat-info .lbl{font-size:0.72rem;color:var(--gray-500);font-weight:600;}
+.stat-info .val{font-size:1.35rem;font-weight:800;color:var(--gray-800);line-height:1.2;}
+
+/* ── MAIN GRID ── */
+.main-grid{display:grid;grid-template-columns:1fr 380px;gap:20px;}
+@media(max-width:960px){.main-grid{grid-template-columns:1fr;}}
+
+/* ── CARD ── */
+.card{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden;}
+.card-head{
+  padding:14px 18px;border-bottom:1px solid var(--gray-200);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-head h2{font-size:0.9rem;font-weight:700;color:var(--gray-800);}
+.card-body{padding:18px;}
+
+/* ── CALENDAR ── */
+.cal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.cal-top-left{display:flex;align-items:center;gap:10px;}
+.cal-badges{display:flex;gap:6px;}
+.badge{font-size:0.7rem;padding:2px 8px;border-radius:20px;font-weight:700;}
+.badge-year{background:var(--gray-100);color:var(--gray-600);}
+.badge-active{background:#DCFCE7;color:#15803D;}
+.cal-title{font-size:1.5rem;font-weight:800;color:var(--gray-800);margin:4px 0 14px;}
+.cal-tabs{display:flex;gap:8px;}
+.cal-tab{
+  font-size:0.78rem;padding:5px 12px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--gray-200);background:var(--white);color:var(--gray-500);font-weight:600;
+}
+.cal-tab.active{background:var(--indigo-light);color:var(--indigo);border-color:var(--indigo-mid);}
+.cal-nav-row{display:flex;align-items:center;gap:6px;}
+.cal-nav-btn{
+  width:28px;height:28px;border-radius:6px;border:1px solid var(--gray-200);
+  background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:0.85rem;color:var(--gray-600);transition:background .15s;
+}
+.cal-nav-btn:hover{background:var(--gray-100);}
+.this-month-btn{font-size:0.75rem;padding:4px 10px;border-radius:6px;border:1px solid var(--gray-200);background:var(--white);cursor:pointer;color:var(--gray-600);font-weight:600;}
+
+/* progress note */
+.progress-note{
+  background:var(--green-light);border-radius:10px;padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;
+}
+.progress-note-left{display:flex;align-items:center;gap:8px;}
+.progress-note-left .icon{color:var(--green);font-size:1rem;}
+.progress-note-left .txt{font-size:0.78rem;color:var(--green);}
+.progress-note-left .txt b{font-weight:700;display:block;font-size:0.82rem;}
+.progress-done{font-size:0.8rem;font-weight:800;color:var(--green);}
+
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.dow{text-align:center;font-size:0.72rem;font-weight:700;padding:4px 0;color:var(--gray-500);}
+.dow.sun{color:var(--red);}
+.dow.sat{color:#2563EB;}
+
+.cal-cell{
+  min-height:64px;border-radius:8px;padding:4px;cursor:pointer;
+  background:var(--gray-50);border:1.5px solid transparent;transition:all .12s;
+  position:relative;
+}
+.cal-cell:hover{border-color:var(--indigo-mid);background:var(--indigo-light);}
+.cal-cell.today{background:#EEF2FF;border-color:var(--indigo);}
+.cal-cell.has-report{background:#F0FDF4;}
+.cal-cell.has-report:hover{background:#DCFCE7;}
+.cal-cell.has-comment{background:#EFF6FF;}
+.cal-cell.empty{background:transparent;pointer-events:none;}
+
+.cell-num{font-size:0.75rem;font-weight:700;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.cal-cell.today .cell-num{background:var(--indigo);color:white;}
+.cell-num.sun{color:var(--red);}
+.cell-num.sat{color:#2563EB;}
+
+.cell-chip{
+  margin-top:2px;font-size:0.62rem;font-weight:700;
+  background:var(--green);color:white;border-radius:4px;
+  padding:1px 5px;display:inline-block;
+}
+.cell-dot{width:6px;height:6px;border-radius:50%;background:#3B82F6;position:absolute;top:5px;right:5px;}
+
+.cal-cell.selected{background:#FEF9C3;border-color:#FCD34D;}
+.cal-cell.selected:hover{background:#FEF08A;border-color:#FACC15;}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:0.72rem;color:var(--gray-500);}
+.leg-dot{width:10px;height:10px;border-radius:3px;}
+
+/* ── REPORT PANEL ── */
+.report-panel{display:flex;flex-direction:column;gap:0;}
+.rp-section{padding:18px;border-bottom:1px solid var(--gray-200);}
+.rp-section:last-child{border-bottom:none;}
+.rp-date-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.rp-date{font-size:1rem;font-weight:800;color:var(--gray-800);}
+.detail-btn{font-size:0.72rem;color:var(--indigo);background:none;border:none;cursor:pointer;font-weight:600;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.toggle-row .lbl{font-size:0.85rem;color:var(--gray-700);font-weight:600;}
+.toggle-row .sub{font-size:0.72rem;color:var(--gray-400);}
+.toggle{position:relative;width:44px;height:24px;}
+.toggle input{opacity:0;width:0;height:0;}
+.slider{
+  position:absolute;inset:0;background:var(--gray-300);border-radius:12px;cursor:pointer;transition:.2s;
+}
+.slider:before{
+  content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;
+  left:3px;top:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.toggle input:checked + .slider{background:var(--indigo);}
+.toggle input:checked + .slider:before{transform:translateX(20px);}
+
+.session-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.session-ctrl{display:flex;align-items:center;gap:6px;}
+.session-ctrl .lbl{font-size:0.72rem;color:var(--gray-400);font-weight:600;}
+.num-btn{
+  width:26px;height:26px;border-radius:6px;border:1px solid var(--gray-200);
+  background:var(--white);cursor:pointer;font-size:0.9rem;color:var(--gray-600);
+  display:flex;align-items:center;justify-content:center;transition:background .12s;
+}
+.num-btn:hover{background:var(--gray-100);}
+.num-val{font-size:1.1rem;font-weight:800;color:var(--gray-800);min-width:24px;text-align:center;}
+.sep{color:var(--gray-300);font-weight:700;}
+
+.progress-circle{
+  width:52px;height:52px;border-radius:50%;
+  background:conic-gradient(var(--indigo) 0% var(--pct,13%),var(--gray-200) var(--pct,13%) 100%);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:auto;
+}
+.progress-circle span{font-size:0.7rem;font-weight:800;color:var(--indigo);}
+
+.form-lbl{font-size:0.78rem;font-weight:700;color:var(--gray-600);margin-bottom:6px;display:block;}
+.form-input{
+  width:100%;padding:9px 12px;border:1.5px solid var(--gray-200);border-radius:8px;
+  font-size:0.85rem;outline:none;transition:border-color .15s;font-family:inherit;
+  margin-bottom:14px;
+}
+.form-input:focus{border-color:var(--indigo);}
+textarea.form-input{resize:vertical;min-height:80px;}
+
+.hw-btns{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.hw-btn{
+  padding:7px 14px;border-radius:8px;font-size:0.8rem;font-weight:700;cursor:pointer;
+  border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-600);transition:all .12s;
+}
+.hw-btn.active-done{background:#DCFCE7;color:var(--green);border-color:#86EFAC;}
+.hw-btn.active-partial{background:#FEF9C3;color:#92400E;border-color:#FCD34D;}
+.hw-btn.active-miss{background:#FEF2F2;color:var(--red);border-color:#FCA5A5;}
+.hw-btn.active-none{background:var(--gray-800);color:white;border-color:var(--gray-800);}
+
+.stars{display:flex;gap:4px;margin-bottom:14px;}
+.star{font-size:1.5rem;cursor:pointer;transition:transform .1s;}
+.star:hover{transform:scale(1.15);}
+.star-count{font-size:0.82rem;color:var(--gray-500);margin-left:6px;align-self:center;}
+
+.link-btn{font-size:0.72rem;color:var(--indigo);background:none;border:none;cursor:pointer;font-weight:600;margin-bottom:6px;}
+
+.btn-save{
+  width:100%;padding:12px;background:var(--indigo);color:white;border:none;
+  border-radius:10px;font-size:0.95rem;font-weight:800;cursor:pointer;transition:background .15s;
+}
+.btn-save:hover{background:var(--indigo-dark);}
+
+/* ── REPORT LIST ── */
+.report-list-head{
+  background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow);
+  padding:18px 20px;
+}
+.rlist-title{font-size:1rem;font-weight:800;color:var(--gray-800);margin-bottom:2px;}
+.rlist-sub{font-size:0.78rem;color:var(--gray-400);margin-bottom:14px;}
+.rlist-search{
+  width:100%;padding:8px 14px;border:1.5px solid var(--gray-200);border-radius:8px;
+  font-size:0.85rem;outline:none;transition:border-color .15s;font-family:inherit;
+}
+.rlist-search:focus{border-color:var(--indigo);}
+.report-cards{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+.report-card{
+  border:1px solid var(--gray-200);border-radius:10px;padding:14px 16px;
+  background:var(--white);transition:box-shadow .15s;
+}
+.report-card:hover{box-shadow:var(--shadow-md);}
+.rc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.rc-date{font-size:0.82rem;font-weight:700;color:var(--gray-700);}
+.rc-session{font-size:0.78rem;font-weight:800;color:var(--indigo);background:var(--indigo-light);padding:2px 8px;border-radius:6px;}
+.rc-stars{display:flex;gap:2px;}
+.rc-star{font-size:0.85rem;}
+.rc-topic{font-size:0.78rem;color:var(--indigo);font-weight:700;margin-bottom:4px;}
+.rc-topic::before{content:'● ';font-size:0.6rem;}
+.rc-comment{font-size:0.8rem;color:var(--gray-500);margin-bottom:8px;line-height:1.5;}
+.rc-footer{display:flex;align-items:center;justify-content:space-between;}
+.hw-tag{font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:6px;}
+.hw-done{background:#DCFCE7;color:var(--green);}
+.hw-partial{background:#FEF9C3;color:#92400E;}
+.hw-miss{background:#FEF2F2;color:var(--red);}
+.hw-none{background:var(--gray-100);color:var(--gray-500);}
+.edit-link{font-size:0.72rem;color:var(--indigo);background:none;border:none;cursor:pointer;font-weight:600;}
+
+/* EMPTY */
+.empty{text-align:center;padding:32px 0;color:var(--gray-400);font-size:0.85rem;}
+
+/* MODAL */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;
+  align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:white;border-radius:16px;padding:24px;width:92%;max-width:460px;
+  box-shadow:0 8px 32px rgba(0,0,0,.18);animation:pop .15s ease;max-height:90vh;overflow-y:auto;
+}
+@keyframes pop{from{transform:scale(.93);opacity:0}to{transform:scale(1);opacity:1}}
+.modal h3{font-size:1.05rem;font-weight:800;margin-bottom:16px;color:var(--indigo-dark);}
+.modal-close-btn{
+  width:100%;margin-top:12px;padding:9px;background:var(--gray-100);border:none;
+  border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:700;color:var(--gray-600);
+}
+.modal-close-btn:hover{background:var(--gray-200);}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--gray-100);}
+::-webkit-scrollbar-thumb{background:var(--indigo-mid);border-radius:4px;}
+
+/* ── SHARE MODAL ── */
+.share-modal-url{
+  width:100%;padding:10px 12px;border:1.5px solid var(--indigo-mid);border-radius:8px;
+  font-size:0.82rem;color:var(--gray-700);background:var(--indigo-light);
+  font-family:monospace;margin:10px 0;outline:none;cursor:text;
+}
+.share-modal-url:focus{border-color:var(--indigo);}
+.share-actions{display:flex;gap:8px;margin-top:4px;}
+.btn-copy{
+  flex:1;padding:9px;background:var(--indigo);color:white;border:none;
+  border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;transition:background .15s;
+}
+.btn-copy:hover{background:var(--indigo-dark);}
+.btn-copy.copied{background:var(--green);}
+.domain-row{display:flex;gap:8px;margin-bottom:10px;}
+.domain-input{
+  flex:1;padding:8px 12px;border:1.5px solid var(--gray-200);border-radius:8px;
+  font-size:0.82rem;outline:none;transition:border-color .15s;font-family:inherit;
+}
+.domain-input:focus{border-color:var(--indigo);}
+.btn-domain-save{
+  padding:8px 14px;background:var(--gray-700);color:white;border:none;
+  border-radius:8px;font-size:0.8rem;font-weight:700;cursor:pointer;white-space:nowrap;
+}
+.share-note{font-size:0.75rem;color:var(--gray-400);margin-top:8px;line-height:1.5;}
+
+/* ── PUBLIC VIEW ── */
+.public-view{display:none;}
+.pub-header{
+  background:linear-gradient(135deg,var(--indigo-dark),var(--indigo));
+  color:white;padding:20px 24px;
+}
+.pub-header h1{font-size:1.2rem;font-weight:800;}
+.pub-header .sub{font-size:0.82rem;opacity:.8;margin-top:2px;}
+.pub-body{max-width:720px;margin:0 auto;padding:24px 16px;display:flex;flex-direction:column;gap:16px;}
+.pub-student-card{
+  background:white;border-radius:14px;box-shadow:var(--shadow-md);padding:20px 24px;
+  border-top:4px solid var(--indigo);
+}
+.pub-student-name{font-size:1.4rem;font-weight:800;color:var(--gray-800);margin-bottom:4px;}
+.pub-student-meta{font-size:0.8rem;color:var(--gray-400);}
+.pub-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px;}
+@media(min-width:500px){.pub-stats{grid-template-columns:repeat(4,1fr);}}
+.pub-stat{background:var(--indigo-light);border-radius:10px;padding:12px;text-align:center;}
+.pub-stat .n{font-size:1.3rem;font-weight:800;color:var(--indigo);}
+.pub-stat .l{font-size:0.7rem;color:var(--gray-500);margin-top:2px;}
+.pub-reports-title{font-size:1rem;font-weight:800;color:var(--gray-800);margin-bottom:12px;}
+.pub-report-card{
+  background:white;border-radius:12px;box-shadow:var(--shadow);padding:16px 18px;
+  border-left:4px solid var(--indigo);
+}
+.pub-rc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px;}
+.pub-rc-date{font-size:0.85rem;font-weight:700;color:var(--gray-700);}
+.pub-rc-badges{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.pub-rc-session{font-size:0.75rem;font-weight:800;color:var(--indigo);background:var(--indigo-light);padding:2px 8px;border-radius:6px;}
+.pub-rc-topic{font-size:0.82rem;color:var(--indigo);font-weight:700;margin-bottom:6px;}
+.pub-rc-topic::before{content:'● ';font-size:0.6rem;}
+.pub-rc-feedback{font-size:0.82rem;color:var(--gray-600);line-height:1.6;margin-bottom:10px;}
+.pub-rc-footer{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.pub-no-data{text-align:center;padding:40px;color:var(--gray-400);font-size:0.9rem;}
+.pub-footer{text-align:center;font-size:0.75rem;color:var(--gray-400);padding:20px 0 40px;}
+.pub-progress-bar{height:8px;background:var(--gray-200);border-radius:4px;overflow:hidden;margin-top:10px;}
+.pub-progress-fill{height:100%;background:var(--indigo);border-radius:4px;transition:width .5s;}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo-icon">📅</div>
+    <div>
+      <div class="logo-text">EduSchedule <span>Pro</span></div>
+    </div>
+    <span class="year-badge">학습 진도 관리</span>
+    <span class="year-badge" id="yearBadge">2026</span>
+  </div>
+  <div class="topbar-right">
+    <button class="topbar-btn" onclick="loadSample()">🔄 샘플 로그 불러오기</button>
+    <button class="topbar-btn danger" onclick="clearAll()">🗑 전체</button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- STUDENT BAR -->
+  <div class="student-bar">
+    <div class="student-input-row">
+      <input id="studentInput" class="student-input" placeholder="새 학생 이름 입력 (예: 홍길동)" maxlength="20"
+        onkeydown="if(event.key==='Enter')addStudent()">
+      <button class="btn-add-student" onclick="addStudent()">+ 등록</button>
+    </div>
+    <div class="student-tags-label">현재 수업 관리 중인 학생 (클릭하면 바로 가기, × 누르면 삭제)</div>
+    <div class="student-tags" id="studentTags">
+      <div class="empty" style="padding:4px 0">등록된 학생이 없어요. 이름을 입력하고 등록해보세요.</div>
+    </div>
+    <div class="share-row" onclick="copyShareLink()">
+      🔗 학생별 리포트 전송 링크 복사 / 설정
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon blue">☑️</div>
+      <div class="stat-info">
+        <div class="lbl">총 기록된 수업</div>
+        <div class="val" id="statTotal">0 회차</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">📈</div>
+      <div class="stat-info">
+        <div class="lbl">마지막 진도 상황</div>
+        <div class="val" id="statProgress">0 / 0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">👍</div>
+      <div class="stat-info">
+        <div class="lbl">과제 완료 횟수</div>
+        <div class="val" id="statHw">0 회 (0%)</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon gray">📊</div>
+      <div class="stat-info">
+        <div class="lbl">학생 평균 이해도</div>
+        <div class="val" id="statAvg">0.0 / 5.0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT: CALENDAR -->
+    <div class="card">
+      <div class="card-body" style="padding:20px;">
+        <!-- top -->
+        <div class="cal-top">
+          <div class="cal-top-left">
+            <div class="cal-badges">
+              <span class="badge badge-year" id="calYear">2026 학사 년도</span>
+              <span class="badge badge-active">이번 달 진행 중</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="cal-tabs">
+              <button class="cal-tab active">📅 월간 분석</button>
+              <button class="cal-tab">📋 연간 요약</button>
+            </div>
+            <div class="cal-nav-row">
+              <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+              <button class="this-month-btn" onclick="goToday()">이번달</button>
+              <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+            </div>
+          </div>
+        </div>
+        <div class="cal-title" id="calTitle">2026년 6월</div>
+
+        <!-- progress note -->
+        <div class="progress-note">
+          <div class="progress-note-left">
+            <span class="icon">✅</span>
+            <div class="txt">
+              <b>이번 달 진행 분석</b>
+              학습 태도 진도율과 수업 완료일을 집계합니다.
+            </div>
+          </div>
+          <span class="progress-done" id="monthProgress">0회 완료</span>
+        </div>
+
+        <div class="cal-grid" id="calGrid"></div>
+
+        <div class="cal-legend">
+          <div class="leg-item"><div class="leg-dot" style="background:#DCFCE7;border:1px solid #86EFAC"></div>수업 완료</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#EEF2FF;border:1px solid var(--indigo-mid)"></div>오늘</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#EFF6FF;border:1px solid #BFDBFE"></div>상세 평가/코멘트 있음</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--gray-50);border:1px solid var(--gray-200)"></div>일반 날짜</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: REPORT PANEL -->
+    <div class="card" style="align-self:start;">
+      <div class="card-head">
+        <h2>오늘의 수업 보고서</h2>
+        <button class="detail-btn" onclick="openDetailModal()">상세 내역</button>
+      </div>
+      <div class="report-panel">
+
+        <!-- date section -->
+        <div class="rp-section">
+          <div class="rp-date-row">
+            <div>
+              <div class="form-lbl">선택한 수업 일자</div>
+              <div class="rp-date" id="rpDate">2026년 6월 11일 (목요일)</div>
+            </div>
+            <input type="date" id="rpDateInput" class="form-input" style="width:auto;margin:0;"
+              onchange="onDateChange()">
+          </div>
+        </div>
+
+        <!-- toggle -->
+        <div class="rp-section">
+          <div class="toggle-row">
+            <div>
+              <div class="lbl">이 날짜에 수업 진행</div>
+              <div class="sub">수업 완료 정보를 입력하고 리포트를 생성합니다.</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="lessonToggle" checked onchange="renderCalendar()">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <!-- session counter -->
+          <div class="session-row">
+            <div class="session-ctrl">
+              <button class="num-btn" onclick="changeSession('done',-1)">−</button>
+              <div class="num-val" id="valDone">1</div>
+              <button class="num-btn" onclick="changeSession('done',1)">+</button>
+              <div class="lbl">완료 (분자)</div>
+            </div>
+            <span class="sep">/</span>
+            <div class="session-ctrl">
+              <button class="num-btn" onclick="changeSession('goal',-1)">−</button>
+              <div class="num-val" id="valGoal">8</div>
+              <button class="num-btn" onclick="changeSession('goal',1)">+</button>
+              <div class="lbl">목표 (분모)</div>
+            </div>
+            <div class="progress-circle" id="progressCircle" style="--pct:13%">
+              <span id="progressPct">13%</span>
+            </div>
+          </div>
+          <div style="font-size:0.72rem;color:var(--gray-400);margin-top:-8px;">수업 진행 횟수</div>
+        </div>
+
+        <!-- topic -->
+        <div class="rp-section">
+          <label class="form-lbl">수업 핵심 학습 주제</label>
+          <input type="text" id="rpTopic" class="form-input" placeholder="예: 영단어 테스트 및 삼각함수 개념 학습">
+
+          <!-- homework -->
+          <label class="form-lbl">과제 수행 여부</label>
+          <div class="hw-btns">
+            <button class="hw-btn active-done" onclick="selectHw('done',this)">과제 완료</button>
+            <button class="hw-btn" onclick="selectHw('partial',this)">일부 완료</button>
+            <button class="hw-btn" onclick="selectHw('miss',this)">과제 미흡</button>
+            <button class="hw-btn" onclick="selectHw('none',this)">없음</button>
+          </div>
+
+          <!-- stars -->
+          <label class="form-lbl">수업 완성도 / 학생 이해도</label>
+          <div class="stars" id="starRow">
+            <span class="star" onclick="setStar(1)">⭐</span>
+            <span class="star" onclick="setStar(2)">⭐</span>
+            <span class="star" onclick="setStar(3)">⭐</span>
+            <span class="star" onclick="setStar(4)">⭐</span>
+            <span class="star" onclick="setStar(5)">⭐</span>
+            <span class="star-count" id="starCount">5 / 5점</span>
+          </div>
+
+          <!-- feedback -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <label class="form-lbl" style="margin:0">수업 종합 피드백</label>
+            <button class="link-btn" onclick="openFeedbackModal()">피드백 리포트</button>
+          </div>
+          <textarea id="rpFeedback" class="form-input" placeholder="오늘 진행된 수업에 대한 종합 평가와 다음 회차 피드백을 자유롭게 기록하세요..."></textarea>
+        </div>
+
+        <!-- save -->
+        <div class="rp-section">
+          <button class="btn-save" onclick="saveReport()">수업 리포트 저장하기</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORT LIST -->
+  <div class="report-list-head">
+    <div class="rlist-title">📄 수업 평가 리포트 모아보기 (<span id="reportCount">0</span>건)</div>
+    <div class="rlist-sub">그동안 작성된 상세 수업 리뷰의 시간순 피드백 보드입니다.</div>
+    <input type="text" class="rlist-search" id="searchInput" placeholder="주제 또는 평가 코멘트 검색..." oninput="renderReportList()">
+    <div class="report-cards" id="reportCards"></div>
+  </div>
+
+</div><!-- /layout -->
+
+<!-- ── PUBLIC VIEW (학생/학부모용 읽기 전용) ── -->
+<div class="public-view" id="publicView">
+  <div class="pub-header">
+    <h1>📋 수업 진도 리포트</h1>
+    <div class="sub" id="pubHeaderSub">EduSchedule Pro · 동탄목동점</div>
+  </div>
+  <div class="pub-body">
+    <div class="pub-student-card" id="pubStudentCard"></div>
+    <div>
+      <div class="pub-reports-title">📄 수업별 상세 기록</div>
+      <div id="pubReportList" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+    <div class="pub-footer">EduSchedule Pro · 동탄목동점 · 열람 전용 페이지</div>
+  </div>
+</div>
+
+<!-- MODAL: share link -->
+<div class="modal-overlay" id="shareModal" onclick="closeModal(event,'shareModal')">
+  <div class="modal">
+    <h3>🔗 학생 리포트 전송 링크</h3>
+    <div style="font-size:0.82rem;color:var(--gray-500);margin-bottom:12px;">
+      아래 링크를 복사해서 학생·학부모에게 전송하세요.<br>링크로 접속하면 해당 학생의 리포트를 읽기 전용으로 볼 수 있어요.
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label style="font-size:0.78rem;font-weight:700;color:var(--gray-600);display:block;margin-bottom:6px;">
+        🌐 도메인 설정 (배포 후 입력)
+      </label>
+      <div class="domain-row">
+        <input type="text" class="domain-input" id="domainInput" placeholder="예: https://myedupro.com">
+        <button class="btn-domain-save" onclick="saveDomain()">저장</button>
+      </div>
+      <div style="font-size:0.72rem;color:var(--gray-400);">비워두면 현재 페이지 주소를 자동으로 사용합니다.</div>
+    </div>
+
+    <label style="font-size:0.78rem;font-weight:700;color:var(--gray-600);display:block;margin-bottom:4px;">
+      📎 복사할 링크
+    </label>
+    <input type="text" class="share-modal-url" id="shareUrlDisplay" readonly onclick="this.select()">
+
+    <div class="share-actions">
+      <button class="btn-copy" id="copyBtn" onclick="doCopyLink()">📋 링크 복사</button>
+    </div>
+    <div class="share-note" id="shareNote">
+      💡 도메인에 HTML 파일을 올린 뒤 위 링크를 전송하세요.<br>
+      로컬 파일(file://)에서는 동일 브라우저에서만 데이터가 공유됩니다.
+    </div>
+    <button class="modal-close-btn" onclick="closeModalById('shareModal')">닫기</button>
+  </div>
+</div>
+
+<!-- MODAL: day detail -->
+<div class="modal-overlay" id="detailModal" onclick="closeModal(event,'detailModal')">
+  <div class="modal">
+    <h3 id="detailModalTitle">상세 내역</h3>
+    <div id="detailModalBody"></div>
+    <button class="modal-close-btn" onclick="closeModalById('detailModal')">닫기</button>
+  </div>
+</div>
+
+<!-- MODAL: feedback AI -->
+<div class="modal-overlay" id="feedbackModal" onclick="closeModal(event,'feedbackModal')">
+  <div class="modal">
+    <h3>💡 피드백 리포트</h3>
+    <div id="feedbackModalBody">
+      <p style="font-size:0.85rem;color:var(--gray-500);line-height:1.6;">
+        현재 입력된 수업 데이터 기반으로 학부모/학생에게 전달할 수 있는 피드백 요약입니다.
+      </p>
+      <div id="feedbackContent" style="margin-top:12px;background:var(--gray-50);border-radius:8px;padding:14px;font-size:0.85rem;line-height:1.7;color:var(--gray-700);"></div>
+    </div>
+    <button class="modal-close-btn" onclick="closeModalById('feedbackModal')">닫기</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+const STORE = 'eduPro_v2_동탄목동점';
+let state = load();
+
+function load(){
+  try{ return JSON.parse(localStorage.getItem(STORE)) || defaultState(); }
+  catch{ return defaultState(); }
+}
+function defaultState(){
+  return {
+    students:[], selectedStudent:null,
+    reports:{},        // key: "studentName_YYYY-MM-DD" → report obj
+    settings:{ goalSessions:8 }
+  };
+}
+function save(){ localStorage.setItem(STORE, JSON.stringify(state)); }
+
+// Current UI state
+const today = new Date();
+let curYear = today.getFullYear(), curMonth = today.getMonth();
+let selectedDate = fmtDate(today);
+let curStar = 5, curHw = 'done';
+let curDone = 1, curGoal = 8;
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+document.getElementById('rpDateInput').value = selectedDate;
+document.getElementById('yearBadge').textContent = today.getFullYear();
+
+// ── Check if this is a public share link ──
+if(!checkPublicView()){
+  render();
+  updateRpDate();
+}
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+function fmtDate(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function fmtKor(ds){
+  const [y,m,d] = ds.split('-');
+  const days=['일','월','화','수','목','금','토'];
+  const dow = days[new Date(+y,+m-1,+d).getDay()];
+  return `${y}년 ${+m}월 ${+d}일 (${dow}요일)`;
+}
+function getReportKey(ds){ return `${state.selectedStudent||'__nostu'}_${ds}`; }
+function getReport(ds){ return state.reports[getReportKey(ds)] || null; }
+
+// ══════════════════════════════════════════
+//  RENDER ALL
+// ══════════════════════════════════════════
+function render(){
+  renderStudentTags();
+  renderCalendar();
+  renderStats();
+  renderReportList();
+}
+
+// ══════════════════════════════════════════
+//  STUDENTS
+// ══════════════════════════════════════════
+function addStudent(){
+  const v = document.getElementById('studentInput').value.trim();
+  if(!v) return;
+  if(state.students.includes(v)){ alert('이미 등록된 학생이에요.'); return; }
+  state.students.push(v);
+  if(!state.selectedStudent) state.selectedStudent = v;
+  save(); render();
+  document.getElementById('studentInput').value='';
+}
+function renderStudentTags(){
+  const c = document.getElementById('studentTags');
+  if(!state.students.length){
+    c.innerHTML='<div class="empty" style="padding:4px 0">등록된 학생이 없어요.</div>';
+    return;
+  }
+  c.innerHTML = state.students.map((s,i)=>`
+    <div class="student-tag ${state.selectedStudent===s?'active':''}" onclick="selectStudent(${i})">
+      👤 ${s}
+      <button class="del" onclick="event.stopPropagation();confirmRemoveStudent(${i})" title="삭제">×</button>
+    </div>`).join('');
+}
+
+function selectStudent(idx){
+  state.selectedStudent = state.students[idx];
+  save(); render();
+}
+
+function confirmRemoveStudent(idx){
+  const name = state.students[idx];
+  if(!name) return;
+  if(!confirm(`'${name}' 학생을 삭제할까요?\n\n이 학생의 모든 수업 리포트 데이터도 함께 삭제됩니다.`)) return;
+  state.students.splice(idx, 1);
+  Object.keys(state.reports).forEach(k=>{ if(k.startsWith(name+'_')) delete state.reports[k]; });
+  if(state.selectedStudent===name) state.selectedStudent = state.students[0]||null;
+  save(); render();
+  showToast(`'${name}' 학생이 삭제됐어요.`);
+}
+
+// ══════════════════════════════════════════
+//  CALENDAR
+// ══════════════════════════════════════════
+function changeMonth(d){
+  curMonth+=d;
+  if(curMonth<0){curMonth=11;curYear--;}
+  if(curMonth>11){curMonth=0;curYear++;}
+  renderCalendar(); renderStats();
+}
+function goToday(){ curYear=today.getFullYear(); curMonth=today.getMonth(); renderCalendar(); renderStats(); }
+
+function renderCalendar(){
+  document.getElementById('calTitle').textContent=`${curYear}년 ${curMonth+1}월`;
+  document.getElementById('calYear').textContent=`${curYear} 학사 년도`;
+
+  const todayStr = fmtDate(today);
+  const monthStr = `${curYear}-${String(curMonth+1).padStart(2,'0')}`;
+  const firstDow = new Date(curYear,curMonth,1).getDay();
+  const daysInMonth = new Date(curYear,curMonth+1,0).getDate();
+
+  const DOW=['일','월','화','수','목','금','토'];
+  let html = DOW.map((d,i)=>`<div class="dow ${i===0?'sun':i===6?'sat':''}">${d}</div>`).join('');
+
+  for(let i=0;i<firstDow;i++) html+=`<div class="cal-cell empty"></div>`;
+
+  let completedThisMonth = 0;
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dow=(firstDow+d-1)%7;
+    const r=getReport(ds);
+    const isToday=ds===todayStr;
+    const hasReport = r && r.lessonDone;
+    const hasComment = r && r.feedback;
+
+    if(hasReport) completedThisMonth++;
+
+    const isSelected = ds === selectedDate;
+
+    let cls='cal-cell';
+    if(isToday) cls+=' today';
+    else if(isSelected) cls+=' selected';
+    else if(hasReport) cls+=' has-report';
+    else if(hasComment) cls+=' has-comment';
+
+    const chip = hasReport
+      ? `<div class="cell-chip">${r.done}/${r.goal}</div>` : '';
+    const dot = hasComment && !hasReport
+      ? `<div class="cell-dot"></div>` : '';
+
+    html+=`
+      <div class="${cls}" onclick="selectDate('${ds}')">
+        <div class="cell-num ${dow===0?'sun':dow===6?'sat':''}">${d}</div>
+        ${chip}${dot}
+      </div>`;
+  }
+  document.getElementById('calGrid').innerHTML=html;
+
+  const done = completedThisMonth;
+  document.getElementById('monthProgress').textContent=`${done}회 완료`;
+}
+
+function selectDate(ds){
+  selectedDate = ds;
+  document.getElementById('rpDateInput').value = ds;
+  updateRpDate();
+  loadReportToForm(ds);
+  renderCalendar(); // ← 노란색 음영 반영
+}
+function onDateChange(){
+  selectedDate = document.getElementById('rpDateInput').value;
+  updateRpDate();
+  loadReportToForm(selectedDate);
+}
+function updateRpDate(){
+  document.getElementById('rpDate').textContent = fmtKor(selectedDate);
+}
+function loadReportToForm(ds){
+  const r = getReport(ds);
+  if(r){
+    document.getElementById('lessonToggle').checked = r.lessonDone;
+    curDone = r.done; curGoal = r.goal;
+    document.getElementById('rpTopic').value = r.topic||'';
+    curHw = r.hw||'done';
+    curStar = r.star||5;
+    document.getElementById('rpFeedback').value = r.feedback||'';
+  } else {
+    document.getElementById('lessonToggle').checked = true;
+    document.getElementById('rpTopic').value='';
+    curHw='done'; curStar=5;
+    document.getElementById('rpFeedback').value='';
+  }
+  updateSessionUI();
+  updateHwUI();
+  updateStarUI();
+}
+
+// ══════════════════════════════════════════
+//  SESSION COUNTER
+// ══════════════════════════════════════════
+function changeSession(field, delta){
+  if(field==='done'){ curDone=Math.max(0,curDone+delta); }
+  else { curGoal=Math.max(1,curGoal+delta); }
+  updateSessionUI();
+}
+function updateSessionUI(){
+  document.getElementById('valDone').textContent=curDone;
+  document.getElementById('valGoal').textContent=curGoal;
+  const pct = Math.round((curDone/curGoal)*100);
+  document.getElementById('progressPct').textContent=pct+'%';
+  document.getElementById('progressCircle').style.setProperty('--pct',pct+'%');
+}
+
+// ══════════════════════════════════════════
+//  HW BUTTONS
+// ══════════════════════════════════════════
+function selectHw(val, el){
+  curHw=val;
+  updateHwUI();
+}
+function updateHwUI(){
+  document.querySelectorAll('.hw-btn').forEach(b=>{
+    b.className='hw-btn';
+    const map={'과제 완료':'done','일부 완료':'partial','과제 미흡':'miss','없음':'none'};
+    const v=map[b.textContent.trim()];
+    if(v===curHw) b.classList.add('active-'+curHw);
+  });
+}
+
+// ══════════════════════════════════════════
+//  STARS
+// ══════════════════════════════════════════
+function setStar(n){ curStar=n; updateStarUI(); }
+function updateStarUI(){
+  const stars=document.querySelectorAll('.star');
+  stars.forEach((s,i)=>{ s.textContent = i<curStar ? '⭐' : '☆'; });
+  document.getElementById('starCount').textContent=`${curStar} / 5점`;
+}
+
+// ══════════════════════════════════════════
+//  SAVE REPORT
+// ══════════════════════════════════════════
+function saveReport(){
+  if(!state.selectedStudent){ alert('먼저 학생을 선택해주세요!'); return; }
+  const key = getReportKey(selectedDate);
+  state.reports[key]={
+    date: selectedDate,
+    student: state.selectedStudent,
+    lessonDone: document.getElementById('lessonToggle').checked,
+    done: curDone,
+    goal: curGoal,
+    topic: document.getElementById('rpTopic').value.trim(),
+    hw: curHw,
+    star: curStar,
+    feedback: document.getElementById('rpFeedback').value.trim(),
+    savedAt: new Date().toISOString()
+  };
+  save();
+  renderCalendar(); renderStats(); renderReportList();
+  showToast('리포트가 저장됐어요! ✅');
+}
+
+function showToast(msg){
+  const t=document.createElement('div');
+  t.textContent=msg;
+  Object.assign(t.style,{
+    position:'fixed',bottom:'24px',right:'24px',background:'#1F2937',color:'white',
+    padding:'10px 18px',borderRadius:'10px',fontWeight:'700',fontSize:'0.85rem',
+    zIndex:'999',boxShadow:'0 4px 16px rgba(0,0,0,.2)',transition:'opacity .3s'
+  });
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),400); },2000);
+}
+
+// ══════════════════════════════════════════
+//  STATS
+// ══════════════════════════════════════════
+function renderStats(){
+  const stu = state.selectedStudent;
+  const allR = Object.values(state.reports).filter(r=>r.student===stu && r.lessonDone);
+  const monthStr=`${curYear}-${String(curMonth+1).padStart(2,'0')}`;
+  const lastR = allR.sort((a,b)=>b.date.localeCompare(a.date))[0];
+
+  document.getElementById('statTotal').textContent = allR.length+'회차';
+  document.getElementById('statProgress').textContent = lastR ? `${lastR.done} / ${lastR.goal}` : '0 / 0';
+
+  const hwDone = allR.filter(r=>r.hw==='done').length;
+  const hwPct = allR.length ? Math.round(hwDone/allR.length*100) : 0;
+  document.getElementById('statHw').textContent = `${hwDone} 회 (${hwPct}%)`;
+
+  const avg = allR.length ? (allR.reduce((s,r)=>s+(r.star||0),0)/allR.length).toFixed(1) : '0.0';
+  document.getElementById('statAvg').textContent = `${avg} / 5.0`;
+}
+
+// ══════════════════════════════════════════
+//  REPORT LIST
+// ══════════════════════════════════════════
+function renderReportList(){
+  const stu = state.selectedStudent;
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let list = Object.values(state.reports)
+    .filter(r=>r.student===stu && r.lessonDone)
+    .filter(r=> !q || (r.topic&&r.topic.toLowerCase().includes(q)) || (r.feedback&&r.feedback.toLowerCase().includes(q)))
+    .sort((a,b)=>b.date.localeCompare(a.date));
+
+  document.getElementById('reportCount').textContent = list.length;
+
+  const c = document.getElementById('reportCards');
+  if(!list.length){
+    c.innerHTML=`<div class="empty">아직 기록된 리포트가 없어요.<br>달력에서 날짜를 선택하고 수업을 기록해보세요!</div>`;
+    return;
+  }
+
+  const hwLabel={done:'과제 완료',partial:'일부 완료',miss:'과제 미흡',none:'과제 없음'};
+  const hwCls={done:'hw-done',partial:'hw-partial',miss:'hw-miss',none:'hw-none'};
+
+  c.innerHTML = list.map(r=>`
+    <div class="report-card">
+      <div class="rc-top">
+        <div class="rc-date">${fmtKor(r.date)}</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="rc-session">수업 ${r.done} / ${r.goal}회차</span>
+          <div class="rc-stars">${'⭐'.repeat(r.star||0)}${'☆'.repeat(5-(r.star||0))}</div>
+        </div>
+      </div>
+      ${r.topic?`<div class="rc-topic">${r.topic}</div>`:''}
+      <div class="rc-comment">${r.feedback||'작성된 종합 평가 코멘트가 없습니다.'}</div>
+      <div class="rc-footer">
+        <span class="hw-tag ${hwCls[r.hw]||'hw-none'}">숙제 여부 &nbsp; ${hwLabel[r.hw]||'과제 없음'}</span>
+        <button class="edit-link" onclick="selectDate('${r.date}');window.scrollTo(0,0)">이 날짜 상세 편집 →</button>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+//  MODALS
+// ══════════════════════════════════════════
+function openDetailModal(){
+  const r = getReport(selectedDate);
+  document.getElementById('detailModalTitle').textContent = fmtKor(selectedDate)+' 상세';
+  const b = document.getElementById('detailModalBody');
+  if(!r){
+    b.innerHTML='<p style="color:var(--gray-400);font-size:.85rem">이 날짜에 저장된 리포트가 없어요.</p>';
+  } else {
+    const hwLabel={done:'과제 완료',partial:'일부 완료',miss:'과제 미흡',none:'과제 없음'};
+    b.innerHTML=`
+      <div style="display:grid;gap:10px;font-size:0.85rem;color:var(--gray-700);">
+        <div><b>학생:</b> ${r.student}</div>
+        <div><b>진도:</b> ${r.done} / ${r.goal}회차 (${Math.round(r.done/r.goal*100)}%)</div>
+        <div><b>주제:</b> ${r.topic||'—'}</div>
+        <div><b>과제:</b> ${hwLabel[r.hw]||'—'}</div>
+        <div><b>이해도:</b> ${'⭐'.repeat(r.star)}${'☆'.repeat(5-r.star)} ${r.star}/5점</div>
+        <div><b>피드백:</b><br><span style="color:var(--gray-500)">${r.feedback||'작성된 피드백이 없습니다.'}</span></div>
+        <div><b>저장 시각:</b> ${new Date(r.savedAt).toLocaleString('ko-KR')}</div>
+      </div>`;
+  }
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function openFeedbackModal(){
+  const r = getReport(selectedDate);
+  const topic = document.getElementById('rpTopic').value || (r&&r.topic) || '';
+  const star = curStar;
+  const hw = curHw;
+  const done = curDone, goal = curGoal;
+  const hwLabel={done:'완료',partial:'일부 완료',miss:'미흡',none:'없음'};
+  const content = document.getElementById('feedbackContent');
+  content.innerHTML=`
+    <p>📅 <b>${fmtKor(selectedDate)}</b></p>
+    <p>📚 수업 주제: <b>${topic||'(미입력)'}</b></p>
+    <p>📈 진도: <b>${done}/${goal}회차</b> 완료</p>
+    <p>✅ 과제: <b>${hwLabel[hw]}</b></p>
+    <p>⭐ 이해도: <b>${star}/5점</b></p>
+    <br>
+    <p style="color:var(--gray-500);">${
+      star>=4 ? '이번 수업에서 학생이 내용을 잘 이해하고 적극적으로 참여했습니다. 다음 수업에도 현재 페이스를 유지할 수 있도록 동기를 유지해주세요.' :
+      star>=3 ? '이번 수업에서 전반적으로 이해했으나 일부 개념에 대한 추가 복습이 필요합니다. 다음 수업 시작 시 오늘 내용을 간단히 리뷰해주세요.' :
+      '이번 수업 내용 이해가 다소 어려웠던 것 같습니다. 다음 수업에서 오늘 내용을 다시 한번 짚어주시고, 추가 자료를 제공하면 도움이 될 것 같습니다.'
+    }</p>`;
+  document.getElementById('feedbackModal').classList.add('open');
+}
+
+function closeModal(e,id){
+  if(e.target===document.getElementById(id)) closeModalById(id);
+}
+function closeModalById(id){ document.getElementById(id).classList.remove('open'); }
+
+// ══════════════════════════════════════════
+//  SHARE LINK & DOMAIN SETTINGS (데이터 URL 인코딩 방식)
+// ══════════════════════════════════════════
+function getBaseUrl(){
+  const saved = localStorage.getItem('eduPro_domain');
+  if(saved && saved.trim()) return saved.trim().replace(/\/+$/,'');
+  return window.location.href.split('?')[0];
+}
+
+function saveDomain(){
+  const v = document.getElementById('domainInput').value.trim();
+  localStorage.setItem('eduPro_domain', v);
+  updateShareUrl();
+  showToast('도메인이 저장됐어요! ✅');
+}
+
+function buildShareUrl(stu){
+  // 해당 학생의 리포트만 추출
+  const reports = Object.entries(state.reports)
+    .filter(([k,v]) => v.student === stu && v.lessonDone)
+    .reduce((acc,[k,v]) => { acc[k]=v; return acc; }, {});
+
+  const payload = { student: stu, reports };
+  // JSON → Base64 인코딩
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  const base = getBaseUrl();
+  return `${base}?r=${encoded}`;
+}
+
+function updateShareUrl(){
+  const stu = state.selectedStudent;
+  if(!stu) return;
+  const el = document.getElementById('shareUrlDisplay');
+  if(!el) return;
+  const url = buildShareUrl(stu);
+  el.value = url;
+  // URL 길이 경고
+  const note = document.getElementById('shareNote');
+  if(url.length > 8000){
+    note.innerHTML='⚠️ 링크가 너무 길어요 (리포트 수가 많아서). 카톡에서는 단축 링크 서비스(bit.ly 등)를 사용해보세요.<br>깃허브 배포 후 도메인 설정을 먼저 해주세요.';
+    note.style.color='var(--red)';
+  } else {
+    note.innerHTML='💡 깃허브 페이지에 배포 후 위 도메인 칸에 주소를 입력하고 저장하세요.<br>링크 자체에 리포트 데이터가 담겨있어서 상대방이 어디서 열어도 바로 볼 수 있어요! 📱';
+    note.style.color='';
+  }
+}
+
+function copyShareLink(){
+  const stu = state.selectedStudent;
+  if(!stu){ alert('먼저 학생을 선택해주세요!'); return; }
+  const saved = localStorage.getItem('eduPro_domain')||'';
+  document.getElementById('domainInput').value = saved;
+  updateShareUrl();
+  document.getElementById('shareModal').classList.add('open');
+}
+
+function doCopyLink(){
+  const url = document.getElementById('shareUrlDisplay').value;
+  const btn = document.getElementById('copyBtn');
+  const doSuccess = () => {
+    btn.textContent='✅ 복사됨!';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent='📋 링크 복사'; btn.classList.remove('copied'); },2500);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(doSuccess).catch(()=>{
+      document.getElementById('shareUrlDisplay').select();
+      document.execCommand('copy');
+      doSuccess();
+    });
+  } else {
+    document.getElementById('shareUrlDisplay').select();
+    document.execCommand('copy');
+    doSuccess();
+  }
+}
+
+// ══════════════════════════════════════════
+//  PUBLIC VIEW (읽기 전용 — URL 데이터 방식)
+// ══════════════════════════════════════════
+function checkPublicView(){
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get('r');
+  if(!encoded) return false;
+
+  let payload;
+  try {
+    payload = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+  } catch(e) {
+    document.body.innerHTML='<div style="text-align:center;padding:60px;font-family:sans-serif;color:#6B7280;">⚠️ 링크가 올바르지 않아요. 선생님께 다시 요청해보세요.</div>';
+    return true;
+  }
+
+  // hide admin UI, show public view
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.layout').style.display='none';
+  document.getElementById('publicView').style.display='block';
+
+  renderPublicView(payload.student, payload.reports);
+  return true;
+}
+
+function renderPublicView(stu, reportsData){
+  document.title = `${stu} 수업 리포트 · EduSchedule Pro`;
+  document.getElementById('pubHeaderSub').textContent = `EduSchedule Pro · 동탄목동점 · ${stu} 학생`;
+
+  const allR = Object.values(reportsData||{})
+    .filter(r=>r.lessonDone)
+    .sort((a,b)=>b.date.localeCompare(a.date));
+
+  const lastR = allR[0];
+  const hwDone = allR.filter(r=>r.hw==='done').length;
+  const hwPct = allR.length ? Math.round(hwDone/allR.length*100) : 0;
+  const avg = allR.length ? (allR.reduce((s,r)=>s+(r.star||0),0)/allR.length).toFixed(1) : '0.0';
+  const pct = lastR ? Math.round(lastR.done/lastR.goal*100) : 0;
+
+  document.getElementById('pubStudentCard').innerHTML=`
+    <div class="pub-student-name">👤 ${stu}</div>
+    <div class="pub-student-meta">EduSchedule Pro · 동탄목동점 수업 진도 리포트</div>
+    <div class="pub-stats">
+      <div class="pub-stat"><div class="n">${allR.length}</div><div class="l">총 수업 회차</div></div>
+      <div class="pub-stat"><div class="n">${lastR?`${lastR.done}/${lastR.goal}`:'—'}</div><div class="l">현재 진도</div></div>
+      <div class="pub-stat"><div class="n">${hwPct}%</div><div class="l">과제 완료율</div></div>
+      <div class="pub-stat"><div class="n">${avg}</div><div class="l">평균 이해도 /5.0</div></div>
+    </div>
+    ${lastR?`
+    <div style="margin-top:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--gray-500);margin-bottom:4px;">
+        <span>전체 진도율</span><span style="font-weight:700;color:var(--indigo)">${pct}%</span>
+      </div>
+      <div class="pub-progress-bar"><div class="pub-progress-fill" style="width:${pct}%"></div></div>
+    </div>`:''}
+  `;
+
+  const hwLabel={done:'과제 완료',partial:'일부 완료',miss:'과제 미흡',none:'과제 없음'};
+  const hwCls={done:'hw-done',partial:'hw-partial',miss:'hw-miss',none:'hw-none'};
+  const container = document.getElementById('pubReportList');
+
+  if(!allR.length){
+    container.innerHTML=`<div class="pub-no-data">아직 기록된 수업이 없어요.</div>`;
+    return;
+  }
+
+  container.innerHTML = allR.map(r=>`
+    <div class="pub-report-card">
+      <div class="pub-rc-top">
+        <div class="pub-rc-date">${fmtKor(r.date)}</div>
+        <div class="pub-rc-badges">
+          <span class="pub-rc-session">수업 ${r.done} / ${r.goal}회차</span>
+          <span>${'⭐'.repeat(r.star||0)}${'☆'.repeat(5-(r.star||0))}</span>
+        </div>
+      </div>
+      ${r.topic?`<div class="pub-rc-topic">${r.topic}</div>`:''}
+      <div class="pub-rc-feedback">${r.feedback||'작성된 수업 피드백이 없습니다.'}</div>
+      <div class="pub-rc-footer">
+        <span class="hw-tag ${hwCls[r.hw]||'hw-none'}">${hwLabel[r.hw]||'과제 없음'}</span>
+        <span style="font-size:0.72rem;color:var(--gray-400);">${new Date(r.savedAt).toLocaleDateString('ko-KR')} 기록</span>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+//  SAMPLE DATA
+// ══════════════════════════════════════════
+function loadSample(){
+  if(!confirm('샘플 데이터를 불러올까요? 기존 데이터가 초기화됩니다.')) return;
+  state = defaultState();
+  state.students = ['이주엘','김민준'];
+  state.selectedStudent = '이주엘';
+  const base = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0');
+  const prevMonth = today.getMonth()===0
+    ? today.getFullYear()-1+'-12'
+    : today.getFullYear()+'-'+String(today.getMonth()).padStart(2,'0');
+
+  const addR=(stu,ds,done,goal,topic,hw,star,fb)=>{
+    state.reports[`${stu}_${ds}`]={date:ds,student:stu,lessonDone:true,done,goal,topic,hw,star,feedback:fb,savedAt:new Date().toISOString()};
+  };
+
+  // get recent monday/wednesday
+  const d0 = new Date(today); d0.setDate(today.getDate()-3);
+  const d1 = new Date(today); d1.setDate(today.getDate()-1);
+  addR('이주엘', fmtDate(d0), 1,8,'첫날 오리엔테이션 및 기본 개념 소개','none',5,'');
+  addR('이주엘', fmtDate(d1), 2,8,'둘째날 복습 및 심화 문제 풀이','none',5,'');
+
+  save(); render(); loadReportToForm(selectedDate);
+  showToast('샘플 데이터가 로드됐어요!');
+}
+
+// ══════════════════════════════════════════
+//  CLEAR ALL
+// ══════════════════════════════════════════
+function clearAll(){
+  if(!confirm('모든 데이터를 초기화할까요?')) return;
+  state = defaultState();
+  save(); render();
+}
+
+// keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+  }
+});
+</script>
+</body>
+</html>
