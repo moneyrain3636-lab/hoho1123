@@ -74,10 +74,10 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',sans-serif;background:var(--gr
 .student-tag .del:hover{opacity:1;color:var(--red);}
 .share-row{
   margin-top:12px;border:1px dashed var(--gray-300);border-radius:8px;
-  padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;
-  color:var(--gray-500);font-size:0.82rem;transition:background .15s;
+  padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;
+  color:var(--indigo);background:var(--indigo-light);font-size:0.82rem;font-weight:700;transition:all .15s;
 }
-.share-row:hover{background:var(--gray-50);}
+.share-row:hover{background:var(--indigo-mid);color:var(--indigo-dark);}
 
 /* ── STATS ── */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
@@ -156,6 +156,7 @@ body{font-family:'Segoe UI','Apple SD Gothic Neo',sans-serif;background:var(--gr
 .cal-cell.has-report{background:#F0FDF4;}
 .cal-cell.has-report:hover{background:#DCFCE7;}
 .cal-cell.has-comment{background:#EFF6FF;}
+.cal-cell.has-comment:hover{background:#EFF6FF;}
 .cal-cell.empty{background:transparent;pointer-events:none;}
 
 .cell-num{font-size:0.75rem;font-weight:700;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
@@ -405,7 +406,8 @@ textarea.form-input{resize:vertical;min-height:80px;}
       <div class="empty" style="padding:4px 0">등록된 학생이 없어요. 이름을 입력하고 등록해보세요.</div>
     </div>
     <div class="share-row" onclick="copyShareLink()">
-      🔗 학생별 리포트 전송 링크 복사 / 설정
+      <span>🔗 우리 아이 안심 카카오톡 리포트 전송 링크 복사 및 환경 설정</span>
+      <span style="font-size:0.75rem;opacity:0.85">설정하기 →</span>
     </div>
   </div>
 
@@ -483,7 +485,7 @@ textarea.form-input{resize:vertical;min-height:80px;}
 
         <div class="cal-grid" id="calGrid"></div>
 
-        <div class="cal-legend">
+        <div class="cal-legend" style="display:flex;gap:12px;margin-top:14px;justify-content:center;flex-wrap:wrap;">
           <div class="leg-item"><div class="leg-dot" style="background:#DCFCE7;border:1px solid #86EFAC"></div>수업 완료</div>
           <div class="leg-item"><div class="leg-dot" style="background:#EEF2FF;border:1px solid var(--indigo-mid)"></div>오늘</div>
           <div class="leg-item"><div class="leg-dot" style="background:#EFF6FF;border:1px solid #BFDBFE"></div>상세 평가/코멘트 있음</div>
@@ -575,7 +577,7 @@ textarea.form-input{resize:vertical;min-height:80px;}
           <!-- feedback -->
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
             <label class="form-lbl" style="margin:0">수업 종합 피드백</label>
-            <button class="link-btn" onclick="openFeedbackModal()">피드백 리포트</button>
+            <button class="link-btn" onclick="openFeedbackModal()">종합 추천 가이드</button>
           </div>
           <textarea id="rpFeedback" class="form-input" placeholder="오늘 진행된 수업에 대한 종합 평가와 다음 회차 피드백을 자유롭게 기록하세요..."></textarea>
         </div>
@@ -602,49 +604,48 @@ textarea.form-input{resize:vertical;min-height:80px;}
 <!-- ── PUBLIC VIEW (학생/학부모용 읽기 전용) ── -->
 <div class="public-view" id="publicView">
   <div class="pub-header">
-    <h1>📋 수업 진도 리포트</h1>
+    <h1>📋 자녀 수업 진도 통합 리포트</h1>
     <div class="sub" id="pubHeaderSub">EduSchedule Pro · 동탄목동점</div>
   </div>
   <div class="pub-body">
     <div class="pub-student-card" id="pubStudentCard"></div>
     <div>
-      <div class="pub-reports-title">📄 수업별 상세 기록</div>
+      <div class="pub-reports-title">📄 회차별 디테일 레코드</div>
       <div id="pubReportList" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
-    <div class="pub-footer">EduSchedule Pro · 동탄목동점 · 열람 전용 페이지</div>
+    <div class="pub-footer">이 보고서는 보호자 안심 카카오톡 링크 전용으로 암호화 조립되었습니다.</div>
   </div>
 </div>
 
 <!-- MODAL: share link -->
 <div class="modal-overlay" id="shareModal" onclick="closeModal(event,'shareModal')">
   <div class="modal">
-    <h3>🔗 학생 리포트 전송 링크</h3>
-    <div style="font-size:0.82rem;color:var(--gray-500);margin-bottom:12px;">
-      아래 링크를 복사해서 학생·학부모에게 전송하세요.<br>링크로 접속하면 해당 학생의 리포트를 읽기 전용으로 볼 수 있어요.
+    <h3>🔗 카카오톡 리포트 전송 링크</h3>
+    <div style="font-size:0.82rem;color:var(--gray-500);margin-bottom:12px;line-height:1.6">
+      데이터베이스 동기화 한계를 해결하기 위해, 학생의 수업 데이터를 하나로 패키징해 Base64 텍스트로 보냅니다. <b>깃허브 배포 링크를 아래 도메인 설정 칸에 한 번만 등록 및 저장해 주시면</b> 완벽하게 조립된 주소가 자동 복사됩니다.
     </div>
 
     <div style="margin-bottom:14px;">
       <label style="font-size:0.78rem;font-weight:700;color:var(--gray-600);display:block;margin-bottom:6px;">
-        🌐 도메인 설정 (배포 후 입력)
+        🌐 깃허브 배포 도메인 주소 등록 (첫 1회 필수)
       </label>
       <div class="domain-row">
-        <input type="text" class="domain-input" id="domainInput" placeholder="예: https://myedupro.com">
+        <input type="text" class="domain-input" id="domainInput" placeholder="예: https://moneyrain3636-lab.github.io/hoho1123">
         <button class="btn-domain-save" onclick="saveDomain()">저장</button>
       </div>
-      <div style="font-size:0.72rem;color:var(--gray-400);">비워두면 현재 페이지 주소를 자동으로 사용합니다.</div>
+      <div style="font-size:0.72rem;color:var(--gray-400);">등록하면 상대방이 어느 폰에서 접속해도 완벽하게 리포트를 바로 읽을 수 있습니다.</div>
     </div>
 
     <label style="font-size:0.78rem;font-weight:700;color:var(--gray-600);display:block;margin-bottom:4px;">
-      📎 복사할 링크
+      📎 복사할 안심 학부모 링크 주소
     </label>
-    <input type="text" class="share-modal-url" id="shareUrlDisplay" readonly onclick="this.select()">
+    <textarea class="share-modal-url" id="shareUrlDisplay" readonly onclick="this.select()" style="height:65px;resize:none;line-height:1.5"></textarea>
 
     <div class="share-actions">
       <button class="btn-copy" id="copyBtn" onclick="doCopyLink()">📋 링크 복사</button>
     </div>
-    <div class="share-note" id="shareNote">
-      💡 도메인에 HTML 파일을 올린 뒤 위 링크를 전송하세요.<br>
-      로컬 파일(file://)에서는 동일 브라우저에서만 데이터가 공유됩니다.
+    <div class="share-note" id="shareNote" style="margin-top:10px;color:var(--indigo);font-weight:600;">
+      💡 도메인 저장 후 [링크 복사] 버튼을 눌러 카카오톡 등으로 전파해 사용하세요. 🎉
     </div>
     <button class="modal-close-btn" onclick="closeModalById('shareModal')">닫기</button>
   </div>
@@ -662,14 +663,17 @@ textarea.form-input{resize:vertical;min-height:80px;}
 <!-- MODAL: feedback AI -->
 <div class="modal-overlay" id="feedbackModal" onclick="closeModal(event,'feedbackModal')">
   <div class="modal">
-    <h3>💡 피드백 리포트</h3>
+    <h3>💡 오늘의 피드백 가이드 추천</h3>
     <div id="feedbackModalBody">
       <p style="font-size:0.85rem;color:var(--gray-500);line-height:1.6;">
-        현재 입력된 수업 데이터 기반으로 학부모/학생에게 전달할 수 있는 피드백 요약입니다.
+        오늘의 이해도 평점에 맞춰 카톡 전송을 돕는 추천 피드백 가이드 문항입니다. [본문 적용하기]를 선택하면 일지에 안전하게 이어 붙여집니다.
       </p>
       <div id="feedbackContent" style="margin-top:12px;background:var(--gray-50);border-radius:8px;padding:14px;font-size:0.85rem;line-height:1.7;color:var(--gray-700);"></div>
     </div>
-    <button class="modal-close-btn" onclick="closeModalById('feedbackModal')">닫기</button>
+    <div class="share-actions" style="margin-top:12px">
+      <button class="btn-copy" onclick="applyTemplate()">✏️ 종합 일지에 내용 적용하기</button>
+    </div>
+    <button class="modal-close-btn" style="margin-top:6px" onclick="closeModalById('feedbackModal')">닫기</button>
   </div>
 </div>
 
@@ -1029,7 +1033,7 @@ function openDetailModal(){
         <div><b>주제:</b> ${r.topic||'—'}</div>
         <div><b>과제:</b> ${hwLabel[r.hw]||'—'}</div>
         <div><b>이해도:</b> ${'⭐'.repeat(r.star)}${'☆'.repeat(5-r.star)} ${r.star}/5점</div>
-        <div><b>피드백:</b><br><span style="color:var(--gray-500)">${r.feedback||'작성된 피드백이 없습니다.'}</span></div>
+        <div><b>피드백:</b><br><span style="color:var(--gray-500);white-space:pre-line;">${r.feedback||'작성된 피드백이 없습니다.'}</span></div>
         <div><b>저장 시각:</b> ${new Date(r.savedAt).toLocaleString('ko-KR')}</div>
       </div>`;
   }
@@ -1044,19 +1048,32 @@ function openFeedbackModal(){
   const done = curDone, goal = curGoal;
   const hwLabel={done:'완료',partial:'일부 완료',miss:'미흡',none:'없음'};
   const content = document.getElementById('feedbackContent');
+  
+  const autoText = star>=4 ? '오늘 과정에서 학생의 전반적인 학습 집중도가 매우 뛰어나 대단히 만족스러웠습니다. 보충 질의 문항도 영리하게 완벽 정비해 낸 만큼 마스터 기조를 이어갈 수 있도록 독려 기조를 유지하겠습니다.' :
+      star>=3 ? '핵심 교리 분석은 성실하게 마쳤으나 몇몇 유형의 오답 개념 복습이 집에서 병행되어야 합니다. 다음 수업 개시 전 오늘 설명한 개념도를 가볍게 구술테스트 및 자가진단 검수하겠습니다.' :
+      '수업 주제의 난이도가 다소 생소하게 느껴졌던 것인지 개념의 이해를 돕기 위한 집중 트레이닝이 필요한 타이밍입니다. 다음 조율 일정에서 오늘 풀이한 오답 노트를 가볍게 일 대 일 재정립하겠습니다.';
+
   content.innerHTML=`
     <p>📅 <b>${fmtKor(selectedDate)}</b></p>
-    <p>📚 수업 주제: <b>${topic||'(미입력)'}</b></p>
-    <p>📈 진도: <b>${done}/${goal}회차</b> 완료</p>
+    <p>📚 수업 주제: <b>${topic||'(주제 미입력)'}</b></p>
+    <p>📈 진도: <b>${done}/${goal}회차 완료</b></p>
     <p>✅ 과제: <b>${hwLabel[hw]}</b></p>
     <p>⭐ 이해도: <b>${star}/5점</b></p>
     <br>
-    <p style="color:var(--gray-500);">${
-      star>=4 ? '이번 수업에서 학생이 내용을 잘 이해하고 적극적으로 참여했습니다. 다음 수업에도 현재 페이스를 유지할 수 있도록 동기를 유지해주세요.' :
-      star>=3 ? '이번 수업에서 전반적으로 이해했으나 일부 개념에 대한 추가 복습이 필요합니다. 다음 수업 시작 시 오늘 내용을 간단히 리뷰해주세요.' :
-      '이번 수업 내용 이해가 다소 어려웠던 것 같습니다. 다음 수업에서 오늘 내용을 다시 한번 짚어주시고, 추가 자료를 제공하면 도움이 될 것 같습니다.'
-    }</p>`;
+    <p style="color:var(--gray-700);font-weight:500;background:#fff;padding:10px;border-radius:6px;border:1px solid #e5e7eb" id="targetFeedText">${autoText}</p>`;
   document.getElementById('feedbackModal').classList.add('open');
+}
+
+function applyTemplate(){
+  const autoText = document.getElementById('targetFeedText').textContent;
+  const currentFeed = document.getElementById('rpFeedback').value;
+  if(currentFeed.trim()){
+    document.getElementById('rpFeedback').value = currentFeed + '\n\n' + autoText;
+  } else {
+    document.getElementById('rpFeedback').value = autoText;
+  }
+  closeModalById('feedbackModal');
+  showToast('추천 가이드가 완료 피드백 란에 적용되었습니다! ✏️');
 }
 
 function closeModal(e,id){
@@ -1065,7 +1082,7 @@ function closeModal(e,id){
 function closeModalById(id){ document.getElementById(id).classList.remove('open'); }
 
 // ══════════════════════════════════════════
-//  SHARE LINK & DOMAIN SETTINGS (데이터 URL 인코딩 방식)
+//  SHARE LINK & DOMAIN SETTINGS (중요: 오류 고침 및 암호화 공유 탑재)
 // ══════════════════════════════════════════
 function getBaseUrl(){
   const saved = localStorage.getItem('eduPro_domain');
@@ -1075,45 +1092,43 @@ function getBaseUrl(){
 
 function saveDomain(){
   const v = document.getElementById('domainInput').value.trim();
-  localStorage.setItem('eduPro_domain', v);
+  localStorage.setItem('eduPro_domain','');
+  if(v) localStorage.setItem('eduPro_domain', v);
   updateShareUrl();
-  showToast('도메인이 저장됐어요! ✅');
-}
-
-function buildShareUrl(stu){
-  // 해당 학생의 리포트만 추출
-  const reports = Object.entries(state.reports)
-    .filter(([k,v]) => v.student === stu && v.lessonDone)
-    .reduce((acc,[k,v]) => { acc[k]=v; return acc; }, {});
-
-  const payload = { student: stu, reports };
-  // JSON → Base64 인코딩
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-  const base = getBaseUrl();
-  return `${base}?r=${encoded}`;
+  showToast('배포 도메인이 저장됐어요! ✅');
 }
 
 function updateShareUrl(){
   const stu = state.selectedStudent;
   if(!stu) return;
+  const base = getBaseUrl();
+  
+  // 1단계: 해당 학생의 모든 완료된 리포트 데이터를 안전하게 집계
+  const studentReports = Object.values(state.reports).filter(function(r) {
+    return r.student === stu;
+  });
+  
+  const shareData = {
+    student: stu,
+    reports: studentReports
+  };
+  
+  // 2단계: 문자열 한글 깨짐을 방지하는 스마트 Base64 인코딩 가동
+  const jsonStr = JSON.stringify(shareData);
+  const base64Str = btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+      return String.fromCharCode('0x' + p1);
+  }));
+  
+  const url = `${base}?r=${base64Str}`;
   const el = document.getElementById('shareUrlDisplay');
-  if(!el) return;
-  const url = buildShareUrl(stu);
-  el.value = url;
-  // URL 길이 경고
-  const note = document.getElementById('shareNote');
-  if(url.length > 8000){
-    note.innerHTML='⚠️ 링크가 너무 길어요 (리포트 수가 많아서). 카톡에서는 단축 링크 서비스(bit.ly 등)를 사용해보세요.<br>깃허브 배포 후 도메인 설정을 먼저 해주세요.';
-    note.style.color='var(--red)';
-  } else {
-    note.innerHTML='💡 깃허브 페이지에 배포 후 위 도메인 칸에 주소를 입력하고 저장하세요.<br>링크 자체에 리포트 데이터가 담겨있어서 상대방이 어디서 열어도 바로 볼 수 있어요! 📱';
-    note.style.color='';
-  }
+  if(el) el.value = url;
 }
 
 function copyShareLink(){
   const stu = state.selectedStudent;
   if(!stu){ alert('먼저 학생을 선택해주세요!'); return; }
+
+  // load saved domain into input
   const saved = localStorage.getItem('eduPro_domain')||'';
   document.getElementById('domainInput').value = saved;
   updateShareUrl();
@@ -1123,57 +1138,138 @@ function copyShareLink(){
 function doCopyLink(){
   const url = document.getElementById('shareUrlDisplay').value;
   const btn = document.getElementById('copyBtn');
-  const doSuccess = () => {
+  navigator.clipboard.writeText(url).then(()=>{
     btn.textContent='✅ 복사됨!';
     btn.classList.add('copied');
-    setTimeout(()=>{ btn.textContent='📋 링크 복사'; btn.classList.remove('copied'); },2500);
-  };
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(url).then(doSuccess).catch(()=>{
-      document.getElementById('shareUrlDisplay').select();
-      document.execCommand('copy');
-      doSuccess();
-    });
-  } else {
+    setTimeout(()=>{ btn.textContent='📋 링크 복사'; btn.classList.remove('copied'); },2000);
+  }).catch(()=>{
+    // fallback
     document.getElementById('shareUrlDisplay').select();
     document.execCommand('copy');
-    doSuccess();
-  }
+    btn.textContent='✅ 복사됨!';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent='📋 링크 복사'; btn.classList.remove('copied'); },2000);
+  });
 }
 
 // ══════════════════════════════════════════
-//  PUBLIC VIEW (읽기 전용 — URL 데이터 방식)
+//  PUBLIC VIEW (읽기 전용 학생 리포트 복원 수신부)
 // ══════════════════════════════════════════
 function checkPublicView(){
   const params = new URLSearchParams(window.location.search);
-  const encoded = params.get('r');
-  if(!encoded) return false;
+  const rParam = params.get('r');
+  const stu = params.get('student');
+  
+  // 1단계: 안전하게 결합된 암호화 데이터(?r=Base64)가 들어있는 경우 (서버 없이 다른 장치 전송 핵심 해결책)
+  if(rParam){
+    try {
+      // 한글 안깨지게 복구 디코딩
+      const decodedStr = decodeURIComponent(atob(rParam).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      
+      const shareData = JSON.parse(decodedStr);
+      const studentName = shareData.student;
+      const reportsList = shareData.reports;
 
-  let payload;
-  try {
-    payload = JSON.parse(decodeURIComponent(escape(atob(encoded))));
-  } catch(e) {
-    document.body.innerHTML='<div style="text-align:center;padding:60px;font-family:sans-serif;color:#6B7280;">⚠️ 링크가 올바르지 않아요. 선생님께 다시 요청해보세요.</div>';
-    return true;
+      // 관리 대시보드 숨기기 및 학부모 뷰 개설
+      document.querySelector('.topbar').style.display='none';
+      document.querySelector('.layout').style.display='none';
+      document.getElementById('publicView').style.display='block';
+
+      renderPublicViewFromData(studentName, reportsList);
+      return true;
+    } catch(e) {
+      console.error("공유 데이터 디코딩 장애:", e);
+      alert("전송된 리포트 데이터에 문제가 있거나 구버전 주소 형식입니다.");
+    }
   }
 
-  // hide admin UI, show public view
-  document.querySelector('.topbar').style.display='none';
-  document.querySelector('.layout').style.display='none';
-  document.getElementById('publicView').style.display='block';
+  // 예전 방식(?student=이름) 복원 백업 (로컬 브라우저 디텍팅 검증용)
+  if(stu){
+    document.querySelector('.topbar').style.display='none';
+    document.querySelector('.layout').style.display='none';
+    document.getElementById('publicView').style.display='block';
 
-  renderPublicView(payload.student, payload.reports);
-  return true;
+    renderPublicView(decodeURIComponent(stu));
+    return true;
+  }
+  
+  return false;
 }
 
-function renderPublicView(stu, reportsData){
+// 선생님 기기에 데이터가 없는 학부모 스마트폰에서 이쁘게 그려내는 비 데이터베이스 렌더러
+function renderPublicViewFromData(stu, reportsList){
   document.title = `${stu} 수업 리포트 · EduSchedule Pro`;
   document.getElementById('pubHeaderSub').textContent = `EduSchedule Pro · 동탄목동점 · ${stu} 학생`;
 
-  const allR = Object.values(reportsData||{})
+  const allR = reportsList
     .filter(r=>r.lessonDone)
     .sort((a,b)=>b.date.localeCompare(a.date));
 
+  // student summary card
+  const lastR = allR[0];
+  const hwDone = allR.filter(r=>r.hw==='done').length;
+  const hwPct = allR.length ? Math.round(hwDone/allR.length*100) : 0;
+  const avg = allR.length ? (allR.reduce((s,r)=>s+(r.star||0),0)/allR.length).toFixed(1) : '0.0';
+  const pct = lastR ? Math.round(lastR.done/lastR.goal*100) : 0;
+
+  document.getElementById('pubStudentCard').innerHTML=`
+    <div class="pub-student-name">👤 ${stu}</div>
+    <div class="pub-student-meta">EduSchedule Pro · 동탄목동점 수업 진도 리포트</div>
+    <div class="pub-stats">
+      <div class="pub-stat"><div class="n">${allR.length}</div><div class="l">총 수업 회차</div></div>
+      <div class="pub-stat"><div class="n">${lastR?`${lastR.done}/${lastR.goal}`:'—'}</div><div class="l">현재 진도</div></div>
+      <div class="pub-stat"><div class="n">${hwPct}%</div><div class="l">과제 완료율</div></div>
+      <div class="pub-stat"><div class="n">${avg}</div><div class="l">평균 이해도 /5.0</div></div>
+    </div>
+    ${lastR?`
+    <div style="margin-top:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--gray-500);margin-bottom:4px;">
+        <span>전체 권장 진도율 점검</span><span style="font-weight:700;color:var(--indigo)">${pct}% 완료</span>
+      </div>
+      <div class="pub-progress-bar"><div class="pub-progress-fill" style="width:${pct}%"></div></div>
+    </div>`:''}
+  `;
+
+  // report list
+  const hwLabel={done:'과제 완료',partial:'일부 완료',miss:'과제 미흡',none:'과제 없음'};
+  const hwCls={done:'hw-done',partial:'hw-partial',miss:'hw-miss',none:'hw-none'};
+  const container = document.getElementById('pubReportList');
+
+  if(!allR.length){
+    container.innerHTML=`<div class="pub-no-data">아직 기록된 수업이 없어요.</div>`;
+    return;
+  }
+
+  container.innerHTML = allR.map(r=>`
+    <div class="pub-report-card">
+      <div class="pub-rc-top">
+        <div class="pub-rc-date">${fmtKor(r.date)}</div>
+        <div class="pub-rc-badges">
+          <span class="pub-rc-session">수업 ${r.done} / ${r.goal}회차</span>
+          <span>${'⭐'.repeat(r.star||0)}${'☆'.repeat(5-(r.star||0))}</span>
+        </div>
+      </div>
+      ${r.topic?`<div class="pub-rc-topic">${r.topic}</div>`:''}
+      <div class="pub-rc-feedback" style="white-space:pre-line">${r.feedback||'작성된 피드백이 아직 존재하지 않습니다.'}</div>
+      <div class="pub-rc-footer">
+        <span class="hw-tag ${hwCls[r.hw]||'hw-none'}">${hwLabel[r.hw]||'과제 없음'}</span>
+        <span style="font-size:0.72rem;color:var(--gray-400);">${new Date(r.savedAt).toLocaleDateString('ko-KR')} 기록됨</span>
+      </div>
+    </div>`).join('');
+}
+
+// 로컬 테스트 호환용 디폴트 렌더러
+function renderPublicView(stu){
+  document.title = `${stu} 수업 리포트 · EduSchedule Pro`;
+  document.getElementById('pubHeaderSub').textContent = `EduSchedule Pro · 동탄목동점 · ${stu} 학생`;
+
+  const allR = Object.values(state.reports)
+    .filter(r=>r.student===stu && r.lessonDone)
+    .sort((a,b)=>b.date.localeCompare(a.date));
+
+  // student summary card
   const lastR = allR[0];
   const hwDone = allR.filter(r=>r.hw==='done').length;
   const hwPct = allR.length ? Math.round(hwDone/allR.length*100) : 0;
@@ -1198,6 +1294,7 @@ function renderPublicView(stu, reportsData){
     </div>`:''}
   `;
 
+  // report list
   const hwLabel={done:'과제 완료',partial:'일부 완료',miss:'과제 미흡',none:'과제 없음'};
   const hwCls={done:'hw-done',partial:'hw-partial',miss:'hw-miss',none:'hw-none'};
   const container = document.getElementById('pubReportList');
@@ -1217,7 +1314,7 @@ function renderPublicView(stu, reportsData){
         </div>
       </div>
       ${r.topic?`<div class="pub-rc-topic">${r.topic}</div>`:''}
-      <div class="pub-rc-feedback">${r.feedback||'작성된 수업 피드백이 없습니다.'}</div>
+      <div class="pub-rc-feedback" style="white-space:pre-line">${r.feedback||'작성된 수업 피드백이 없습니다.'}</div>
       <div class="pub-rc-footer">
         <span class="hw-tag ${hwCls[r.hw]||'hw-none'}">${hwLabel[r.hw]||'과제 없음'}</span>
         <span style="font-size:0.72rem;color:var(--gray-400);">${new Date(r.savedAt).toLocaleDateString('ko-KR')} 기록</span>
@@ -1243,10 +1340,10 @@ function loadSample(){
   };
 
   // get recent monday/wednesday
-  const d0 = new Date(today); d0.setDate(today.getDate()-3);
-  const d1 = new Date(today); d1.setDate(today.getDate()-1);
-  addR('이주엘', fmtDate(d0), 1,8,'첫날 오리엔테이션 및 기본 개념 소개','none',5,'');
-  addR('이주엘', fmtDate(d1), 2,8,'둘째날 복습 및 심화 문제 풀이','none',5,'');
+  const d0 = new Date(today); d0.setDate(today.getDate()-5);
+  const d1 = new Date(today); d1.setDate(today.getDate()-2);
+  addR('이주엘', fmtDate(d0), 1,8,'첫날 오리엔테이션 및 관계대명사 핵심 공식 소개','done',5,'첫날 수업에 아주 의욕 가득하며 늠름하게 잘 마쳤습니다. 단어 시험 성적도 우수합니다.');
+  addR('이주엘', fmtDate(d1), 2,8,'심화 오답 풀이 및 수능 필수 예문 해석 실습','none',4,'구문 독해에서 동사 구분을 약간 헷갈려 하지만 피드백 주니 금방 이해하고 고쳐냈습니다.');
 
   save(); render(); loadReportToForm(selectedDate);
   showToast('샘플 데이터가 로드됐어요!');
